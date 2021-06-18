@@ -1,0 +1,23 @@
+- hosts: localhost
+  gather_facts: no
+  vars:
+    certs_path: ../certs
+    crt_common_name: graspingtech.com
+    crt_subject_alt_name: 
+      - www.graspingtech.com
+    cloudflare_email:     "{{ lookup('env','CF_EMAIL') }}"
+    cloudflare_api_token: "{{ lookup('env','CF_API_TOKEN') }}"
+    cloudflare_zone:      "{{ lookup('env','CF_ZONE') }}"
+  
+  tasks:
+  - name: create directory to store certs
+    file:
+      path: "{{ certs_path }}"
+      state: directory
+
+  - name: generate csr
+    openssl_csr:
+      path: "{{ certs_path }}/{{ crt_common_name }}.csr"
+      privatekey_path: "{{ certs_path }}/{{ crt_common_name }}.pem"
+      common_name: "{{ crt_common_name }}"
+      subject_alt_name: "DNS:{{ crt_subject_alt_name | join(',DNS:') }}"
